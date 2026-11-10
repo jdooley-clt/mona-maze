@@ -161,7 +161,7 @@ retains traces/screenshots on failure in ignored `test-results/`. Inspect a
 failure with `npx playwright show-trace test-results/<test>/trace.zip`.
 
 The harness checks out the real static <https://github.com/jdooley-clt/arcade> at
-`18b9d013a9591c9d97348f21023f875eb2a7630b` into ignored `.playwright-cabinet/`.
+`cdbd39c365f5daf50f47d06d10644d61d1572aaf` into ignored `.playwright-cabinet/`.
 It does not install or build the cabinet. The loopback-only server serves the
 unaltered cabinet at `/arcade/` and the freshly built
 `dist/mona-merge-maze.html` at `/mona-maze/`, on the **same origin**, as in
