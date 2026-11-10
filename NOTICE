@@ -1,0 +1,20 @@
+Mona's Merge Maze is licensed under the MIT License; see LICENSE. That
+license covers the original game code, the procedural game art, and the
+synthesized soundtrack. It does not grant rights to GitHub's Octocat design
+or trademarks. Mona, the Octocat character drawn procedurally with Three.js
+primitives in main.js (makeMona), remains copyright GitHub, Inc. and subject
+to GitHub's artwork terms: https://octodex.github.com/faq/
+
+Mona Sans (assets/mona-sans.woff2) is licensed under the SIL Open Font
+License; see assets/Mona-Sans-OFL.txt.
+
+The GitHub mark (assets/mark-github.svg) from Primer Octicons is licensed
+under the MIT License; see assets/Octicons-LICENSE.txt.
+
+Three.js is licensed under the MIT License. Its license text is not copied
+into this repository: the standalone build, dist/mona-merge-maze.html, keeps
+the Three.js license header (Copyright 2010-2025 Three.js Authors,
+SPDX-License-Identifier: MIT) at the end of the embedded script, and the full
+text ships with the three npm package as node_modules/three/LICENSE.
+
+The font and icon license texts are also embedded in the standalone HTML.
