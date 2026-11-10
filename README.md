@@ -5,16 +5,10 @@ and walk through deployment portals to reach the next repository.
 
 ## Origins
 
-Mona's Merge Maze was originally created by Christina Warren
-([@filmgirl](https://github.com/filmgirl)) at
-<https://github.com/filmgirl/mona-maze>. This repository is a copy of that
-project that preserves its full history, so the game can keep being published
-in the arcade. All original credits stay exactly as they are; work done in this
-copy is attributed to its own authors going forward.
-
-**Maintainer note:** this copy is maintained by
-[@jdooley-clt](https://github.com/jdooley-clt). Report problems with the
-published game at <https://github.com/jdooley-clt/mona-maze/issues>.
+Created by Christina Warren ([@filmgirl](https://github.com/filmgirl)),
+currently maintained by Jeramiah Dooley
+([@jdooley-clt](https://github.com/jdooley-clt)). Original repository:
+<https://github.com/filmgirl/mona-maze>.
 
 ## Play
 
