@@ -3,11 +3,24 @@
 A 3D maze-chase game starring Mona the Octocat. Collect commits, resolve bugs,
 and walk through deployment portals to reach the next repository.
 
+## Origins
+
+Mona's Merge Maze was originally created by Christina Warren
+([@filmgirl](https://github.com/filmgirl)) at
+<https://github.com/filmgirl/mona-maze>. This repository is a copy of that
+project that preserves its full history, so the game can keep being published
+in the arcade. All original credits stay exactly as they are; work done in this
+copy is attributed to its own authors going forward.
+
+**Maintainer note:** this copy is maintained by
+[@jdooley-clt](https://github.com/jdooley-clt). Report problems with the
+published game at <https://github.com/jdooley-clt/mona-maze/issues>.
+
 ## Play
 
-Play online at **<https://filmgirl.github.io/mona-maze/>**.
+Play online at **<https://jdooley-clt.github.io/mona-maze/>**.
 
-Find more games in **[GitHub Arcade](https://filmgirl.github.io/arcade/)**.
+Find more games in **[GitHub Arcade](https://jdooley-clt.github.io/arcade/)**.
 The game's footer links back to the arcade when played standalone; the link is
 hidden inside an iframe so embedded play stays in the cabinet.
 
@@ -109,13 +122,13 @@ runs the Node tests, builds the candidate, and exercises it inside the real
 Commit Cabinet before deployment is allowed. The deployment job depends on that
 check and publishes the exact tested HTML as `index.html`, without rebuilding.
 Pull requests (including forks) run the same gate with read-only repository
-permissions and never deploy. Publishing is restricted to `filmgirl/mona-maze`;
+permissions and never deploy. Publishing is restricted to `jdooley-clt/mona-maze`;
 pushes and manual runs in forks cannot upload a Pages artifact or deploy.
 Pages and OIDC write permissions are limited to
 the main-only deployment job. Source files and test fixtures are not published.
 
 **Published cabinet smoke** then checks the actual game and
-<https://filmgirl.github.io/arcade/#game/mona-maze>. It checks the served HTML's
+<https://jdooley-clt.github.io/arcade/#game/mona-maze>. It checks the served HTML's
 SHA-256 against the tested artifact, a nonblank WebGL board, start, movement,
 camera, and pause inside the iframe, not just an iframe load event. There are
 at most three smoke attempts, separated by 10 and 20 seconds, to allow Pages
@@ -147,7 +160,7 @@ suite has **no retries**, uses one Chromium worker with software WebGL, and
 retains traces/screenshots on failure in ignored `test-results/`. Inspect a
 failure with `npx playwright show-trace test-results/<test>/trace.zip`.
 
-The harness checks out the real static <https://github.com/filmgirl/arcade> at
+The harness checks out the real static <https://github.com/jdooley-clt/arcade> at
 `18b9d013a9591c9d97348f21023f875eb2a7630b` into ignored `.playwright-cabinet/`.
 It does not install or build the cabinet. The loopback-only server serves the
 unaltered cabinet at `/arcade/` and the freshly built

@@ -11,5 +11,5 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: 'list',
   outputDir: `test-results/live-${process.env.SMOKE_ATTEMPT ?? '1'}`,
-  use: { ...candidateConfig.use, baseURL: 'https://filmgirl.github.io' },
+  use: { ...candidateConfig.use, baseURL: 'https://jdooley-clt.github.io' },
 });

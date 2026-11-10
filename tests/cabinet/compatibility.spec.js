@@ -33,7 +33,7 @@ async function standaloneBacklink(page) {
   await expect(page).toHaveURL(/\/mona-maze\/$/);
   await ready(page);
   const link = page.getByRole('link', { name: 'GitHub Arcade', exact: true });
-  await expect(link).toHaveAttribute('href', 'https://filmgirl.github.io/arcade/');
+  await expect(link).toHaveAttribute('href', 'https://jdooley-clt.github.io/arcade/');
   expect(await link.getAttribute('target')).toBeNull();
   await reachable(link);
   expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(44);
@@ -56,10 +56,10 @@ test('standalone backlink supports native keyboard navigation without gameplay s
   await expect(page.locator('#stage')).not.toHaveClass(/playing/);
   await expect(page.locator('#message')).toBeHidden();
   // Keep the candidate gate offline while asserting the native navigation destination.
-  await page.route('https://filmgirl.github.io/arcade/', route =>
+  await page.route('https://jdooley-clt.github.io/arcade/', route =>
     route.fulfill({ contentType: 'text/html', body: '<title>GitHub Arcade destination</title>' }));
   await link.press('Enter');
-  await expect(page).toHaveURL('https://filmgirl.github.io/arcade/');
+  await expect(page).toHaveURL('https://jdooley-clt.github.io/arcade/');
 });
 
 for (const keyboard of [false, true]) {
@@ -176,10 +176,10 @@ for (const width of [320, 390]) {
     });
     test('standalone backlink supports touch navigation without horizontal overflow', { tag: '@standalone' }, async ({ page }) => {
       const link = await standaloneBacklink(page);
-      await page.route('https://filmgirl.github.io/arcade/', route =>
+      await page.route('https://jdooley-clt.github.io/arcade/', route =>
         route.fulfill({ contentType: 'text/html', body: '<title>GitHub Arcade destination</title>' }));
       await link.tap();
-      await expect(page).toHaveURL('https://filmgirl.github.io/arcade/');
+      await expect(page).toHaveURL('https://jdooley-clt.github.io/arcade/');
     });
   });
 }
