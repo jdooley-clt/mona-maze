@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { watchHealth, ready, start, moveAndCollect } from './helpers.js';
 
-const gameURL = 'https://filmgirl.github.io/mona-maze/';
-const cabinetURL = 'https://filmgirl.github.io/arcade/#game/mona-maze';
+const gameURL = 'https://jdooley-clt.github.io/mona-maze/';
+const cabinetURL = 'https://jdooley-clt.github.io/arcade/#game/mona-maze';
 
 async function publishedIdentity(response) {
   expect(response?.ok(), 'Published game must respond successfully').toBe(true);
@@ -15,7 +15,7 @@ async function publishedIdentity(response) {
 }
 
 test('published game starts directly and inside the production cabinet', async ({ page }) => {
-  const health = watchHealth(page, ['https://filmgirl.github.io']);
+  const health = watchHealth(page, ['https://jdooley-clt.github.io']);
   await publishedIdentity(await page.goto(gameURL));
   await ready(page);
   await start(page);
