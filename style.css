@@ -19,6 +19,10 @@
   --cp-success: #16a34a;
   --cp-danger: #dc2626;
   --cp-warning: #f59e0b;
+  /* Text-grade variants (>= 4.5:1 on every surface); the base tokens stay for fills and the 3D palette. */
+  --cp-success-ink: #166534;
+  --cp-danger-ink: #b91c1c;
+  --cp-warning-ink: #a84f0a;
   --cp-link: #005fb8;
   --cp-shadow: 0 18px 48px rgba(48, 35, 64, 0.12);
   --cp-overlay: rgba(250, 248, 253, 0.8);
@@ -47,6 +51,9 @@ html[data-theme="dark"] {
   --cp-success: #4ade80;
   --cp-danger: #f87171;
   --cp-warning: #fbbf24;
+  --cp-success-ink: #4ade80;
+  --cp-danger-ink: #f87171;
+  --cp-warning-ink: #fbbf24;
   --cp-link: #4da6ff;
   --cp-shadow: 0 18px 48px rgba(20, 13, 29, 0.32);
   --cp-overlay: rgba(33, 27, 43, 0.88);
@@ -90,7 +97,7 @@ html[data-theme="dark"] {
 .objective-inline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
 .objective-inline b { font: 9px Consolas, "Courier New", monospace; letter-spacing: .5px; color: var(--cp-text-muted); }
 .objective-inline span { font-size: 11px; color: var(--cp-text-soft); }
-.objective-inline.unlocked b { color: var(--cp-success); }
+.objective-inline.unlocked b { color: var(--cp-success-ink); }
 .view-meta { display: flex; align-items: center; gap: 20px; color: var(--cp-text-soft); font: 9px Consolas, "Courier New", monospace; letter-spacing: .7px; }
 .notice-line { flex-basis: 100%; min-height: 16px; font-size: 11px; line-height: 1.5; color: var(--cp-text-muted); opacity: 0; transition: opacity .15s; }
 .notice-line.visible { opacity: 1; }
@@ -134,8 +141,8 @@ html[data-theme="dark"] {
   font-family: "Mona Sans";
   src: url("data:font/woff2;base64,MONA_SANS_FONT_DATA") format("woff2");
   font-style: normal;
-  font-weight: 200 900;
-  font-stretch: 75% 125%;
+  font-weight: 400 800;
+  font-stretch: normal;
   font-display: swap;
 }
 .app, dialog { font-family: "Mona Sans", "Segoe UI", sans-serif; }
@@ -183,7 +190,7 @@ html[data-theme="dark"] {
 .item-status small { display: block; font-size: 9px; }
 .item-status strong { min-width: 4ch; margin-left: auto; text-align: right; font-size: 12px; }
 .item-status[data-active="true"] { color: var(--cp-text); }
-.item-status[data-active="true"] strong { color: var(--cp-success); }
+.item-status[data-active="true"] strong { color: var(--cp-success-ink); }
 .pickup-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 18px; width: 18px; height: 18px; border: 1.5px solid currentColor; font-size: 10px; line-height: 1; }
 .chip-icon { color: var(--cp-secondary-fg); background: var(--cp-secondary); border-style: dashed; }
 .battery-icon { color: var(--cp-accent); border-radius: 3px; }
@@ -196,6 +203,9 @@ footer { align-items: center; flex-wrap: wrap; gap: 8px 16px; }
 .notice-line { height: 34px; overflow: hidden; }
 #theme[aria-pressed="true"] { color: var(--cp-accent); border-color: var(--cp-accent); }
 #pen-status { white-space: nowrap; min-width: 52px; }
+/* The shell clips overflow, so the stage ring is drawn inside its edges to stay fully visible. */
+.stage:focus-visible { outline-offset: -4px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 @media(max-width:650px) {
   .topbar .brand > span { display: none; }
   .topbar .brand svg { width: 28px; height: 28px; }
