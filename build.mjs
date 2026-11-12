@@ -1,6 +1,7 @@
 import { build } from 'esbuild';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { stampPolicy } from './csp.mjs';
+import { subsetMonaSans } from './font.mjs';
 
 const result = await build({
   entryPoints: ['main.js'], bundle: true, minify: true,
@@ -14,7 +15,8 @@ if (template !== source) {
   console.log('Refreshed the Content Security Policy hashes in index.html');
 }
 const css = await readFile('style.css', 'utf8');
-const font = (await readFile('assets/mona-sans.woff2')).toString('base64');
+// The committed font stays the unmodified Original Version; only the page embeds the subset (see font.mjs).
+const font = (await subsetMonaSans()).toString('base64');
 const markSvg = await readFile('assets/mark-github.svg', 'utf8');
 const mark = markSvg.replace('<svg ', '<svg aria-hidden="true" fill="currentColor" ');
 const licenses = await readFile('assets/Mona-Sans-OFL.txt', 'utf8') + '\n\n' + await readFile('assets/Octicons-LICENSE.txt', 'utf8');

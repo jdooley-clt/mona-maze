@@ -38,7 +38,7 @@
       <section class="game-shell" aria-label="Mona's Merge Maze game">
         <div class="game-toolbar">
           <div class="map-control"><span class="branch-icon" aria-hidden="true">⑂</span><div><span class="repository-label">REPOSITORY</span><strong id="repository-name">Contribution garden</strong></div><span class="branch-tag" id="branch">main</span></div>
-          <div class="scoreboard"><div><span>SCORE</span><strong id="score">00000</strong></div><div class="best-stat"><span>BEST</span><strong id="best">00000</strong></div><div><span>LIVES</span><strong id="lives" class="lives" aria-label="3 lives">♥ ♥ ♥</strong></div></div>
+          <div class="scoreboard"><div><span>SCORE</span><strong id="score">00000</strong></div><div class="best-stat"><span>BEST</span><strong id="best">00000</strong></div><div><span>LIVES</span><strong id="lives" class="lives" role="img" aria-label="3 lives">♥ ♥ ♥</strong></div></div>
         </div>
         <div class="playbar">
           <span class="level-counter" aria-live="polite">LEVEL <strong id="level">01</strong></span>
@@ -46,14 +46,14 @@
           <div class="power-inline" id="power" data-active="false" aria-hidden="true"><span>SUPER MERGE</span><div><i id="power-fill"></i></div><b id="power-time">8.0s</b></div>
           <div class="stage-buttons"><button id="new-run" title="Fresh board at level 1; resets score and lives" disabled>New run</button><button id="restart" title="Replay this board; resets score and lives" aria-label="Restart level">↻</button><button id="pause" title="Pause (P)" aria-label="Pause game">Ⅱ</button></div>
         </div>
-        <div class="item-statusbar" aria-label="Optional pickup effects">
+        <div class="item-statusbar" role="group" aria-label="Optional pickup effects">
           <span class="pickup-note">OPTIONAL PICKUPS</span>
           <span class="item-status" id="overclock-status" data-active="false"><b class="pickup-icon battery-icon" aria-hidden="true">+</b><span>Overclock <small>1.3x speed</small></span><strong id="overclock-time">--</strong></span>
           <span class="item-status" id="firewall-status" data-active="false"><b class="pickup-icon shield-icon" aria-hidden="true">F</b><span>Firewall <small>blocks one hit</small></span><strong id="firewall-time">--</strong></span>
         </div>
         <div class="launch-strip" id="intro"><div><h2>Small cat. Big repository.</h2><p>Collect commits. Dodge bugs. Find the exit.</p></div><button id="play" class="primary" disabled>Let's ship it <span aria-hidden="true">→</span></button></div>
         <div class="play-area">
-          <div class="stage" id="stage" tabindex="0" aria-label="3D maze. Use arrow keys or WASD to move. Press V to switch camera and P to pause.">
+          <div class="stage" id="stage" tabindex="0" role="application" aria-label="3D maze. Use arrow keys or WASD to move. Press V to switch camera and P to pause.">
             <canvas id="scene" aria-label="3D game board"></canvas>
             <div class="crosshair" id="crosshair" hidden aria-hidden="true">+</div>
             <div class="message" id="message" hidden><span class="eyebrow" id="message-kicker">TAKE A BREATHER</span><h2 id="message-title">Paused.</h2><p id="message-detail">Your commits aren't going anywhere.</p><button id="resume" class="primary">Keep going <span>→</span></button></div>
@@ -63,8 +63,9 @@
         <div class="control-dock">
           <div class="objective-inline" id="objective"><b id="objective-title">DEPLOY PORTAL / LOCKED</b><span id="objective-detail">Collect every commit to open the north exit.</span></div>
           <div class="view-meta"><span id="pen-status" title="Captured bugs are held for five seconds before release">Pen 0/4</span><span id="view-label">ORTHOGRAPHIC / 3D</span><span id="compass">N ↑</span></div>
-          <div class="touch-pad" aria-label="Movement controls"><button data-dir="0" aria-label="Move up or forward">↑</button><button data-dir="3" aria-label="Move left or turn left">←</button><button data-dir="2" aria-label="Move down or backward">↓</button><button data-dir="1" aria-label="Move right or turn right">→</button></div>
+          <div class="touch-pad" role="group" aria-label="Movement controls"><button data-dir="0" aria-label="Move up or forward">↑</button><button data-dir="3" aria-label="Move left or turn left">←</button><button data-dir="2" aria-label="Move down or backward">↓</button><button data-dir="1" aria-label="Move right or turn right">→</button></div>
           <div class="notice-line" id="toast" role="status" aria-live="polite"></div>
+          <div class="visually-hidden" id="announcer" role="status" aria-live="polite"></div>
         </div>
         <!-- ASSET_LICENSES -->
         <div class="progress-row"><div><span class="live-dot"></span><b id="collected">0</b><span>/</span><span id="total">0</span> commits collected</div><div class="progress-track"><i id="progress-fill"></i></div><span id="percentage">0%</span></div>

@@ -23,6 +23,17 @@ test('only executable inline scripts and style blocks are hashed', () => {
   });
 });
 
+test('elements are delimited the way the HTML tokenizer delimits them', () => {
+  const html = `<SCRIPT\tdata-note="a > b" type='module'>one()</script\t\n bar><scripts>no</scripts>
+    <script>two("</scripty>")</SCRIPT/><style
+      media="screen">a{}</style ><script src = x.js></script>`;
+  assert.deepEqual(inlineSources(html), {
+    scripts: [hashSource('one()'), hashSource('two("</scripty>")')],
+    styles: [hashSource('a{}')],
+  });
+  assert.deepEqual(inlineSources('<script>never closed'), { scripts: [], styles: [] });
+});
+
 test('stamping rewrites only script-src and style-src and refuses pages without a policy', () => {
   const stamped = stampPolicy(`${META}<script>run()</script>`);
   assert.deepEqual(readPolicy(stamped), {

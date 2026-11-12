@@ -840,6 +840,7 @@ function updateUI() {
     saveBest();
   }
   if (lastStatus === game.status) return;
+  const previousStatus = lastStatus;
   lastStatus = game.status;
   saveBest();
   const status = game.status;
@@ -859,7 +860,8 @@ function updateUI() {
   if (copy) {
     $('message-kicker').textContent = copy[0]; $('message-title').textContent = copy[1];
     $('message-detail').textContent = copy[2]; $('resume').textContent = copy[3];
-  }
+    setText('announcer', `${copy[0].replace(/\.$/, '')}. ${copy[1]} ${copy[2]}`);
+  } else if (status === 'playing' && previousStatus === 'paused') setText('announcer', 'Resumed.');
 }
 function switchView(next) {
   if (view === next) return;
@@ -948,6 +950,11 @@ const keyDirections = { ArrowUp: 0, KeyW: 0, w: 0, W: 0, ArrowRight: 1, KeyD: 1,
 document.addEventListener('keydown', e => {
   if ($('help-dialog').open || e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target instanceof Element && e.target.closest('a')) return;
+  // Single-character shortcuts (WASD, V, P) only act while the stage or the page itself has focus,
+  // so they cannot fire while a control elsewhere on the page is focused (WCAG 2.1.4).
+  const stageHasFocus = !(e.target instanceof Element) || e.target === document.body
+    || e.target === document.documentElement || stage.contains(e.target);
+  if (!stageHasFocus && /^[a-z]$/i.test(e.key)) return;
   if (keyDirections[e.key] !== undefined) {
     e.preventDefault();
     const direction = keyDirections[e.key];
@@ -987,16 +994,21 @@ $('resume').onclick = () => {
   else reset(true);
   stage.focus({ preventScroll: true });
 };
-$('sound').onclick = async () => {
+// A pointer click on a settings toggle hands keyboard control back to the stage; keyboard
+// activation (detail 0) keeps focus on the toggle.
+const refocusStage = event => { if (event?.detail && game) stage.focus({ preventScroll: true }); };
+$('sound').onclick = async e => {
   soundEnabled = !soundEnabled;
   if (soundEnabled) await activateAudio();
   audioButtons();
+  refocusStage(e);
 };
-$('music').onclick = async () => {
+$('music').onclick = async e => {
   musicEnabled = !musicEnabled;
   music?.setEnabled(musicEnabled);
   if (musicEnabled) await activateAudio();
   audioButtons();
+  refocusStage(e);
 };
 function applyTheme(next) {
   document.documentElement.dataset.theme = next;
@@ -1023,10 +1035,11 @@ function applyTheme(next) {
   catch (error) { console.warn('Could not save theme preference.', error); toast('Theme changed for this session; browser storage is unavailable.'); }
 }
 $('theme').setAttribute('aria-pressed', String(dark));
-$('theme').onclick = () => applyTheme(dark ? 'light' : 'dark');
+$('theme').onclick = e => { applyTheme(dark ? 'light' : 'dark'); refocusStage(e); };
 $('enemy-legend').replaceChildren(...ENEMIES.map(enemy => {
   const div = document.createElement('div'), symbol = document.createElement('b');
-  symbol.style.color = `var(${enemy.color})`;
+  // Prefer the text-grade "-ink" variant of the enemy colour where one exists (see style.css).
+  symbol.style.color = `var(${enemy.color}-ink, var(${enemy.color}))`;
   symbol.textContent = enemy.symbol;
   div.append(symbol, document.createTextNode(enemy.name));
   return div;
@@ -1076,8 +1089,9 @@ function frame(timestamp) {
 async function initialize() {
 try {
   await document.fonts.load('700 16px "Mona Sans"');
-  renderer = new THREE.WebGLRenderer({ canvas: $('scene'), antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  // Conference booths and phones run this on battery: prefer the integrated GPU and cap the backing store.
+  renderer = new THREE.WebGLRenderer({ canvas: $('scene'), antialias: true, powerPreference: 'low-power' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.autoUpdate = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;

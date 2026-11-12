@@ -6,7 +6,10 @@ primitives in main.js (makeMona), remains copyright GitHub, Inc. and subject
 to GitHub's artwork terms: https://octodex.github.com/faq/
 
 Mona Sans (assets/mona-sans.woff2) is licensed under the SIL Open Font
-License; see assets/Mona-Sans-OFL.txt.
+License; see assets/Mona-Sans-OFL.txt. The committed file is the unmodified
+original; the standalone build embeds a subset of it, cut at build time to
+the characters the game renders, as the license permits for fonts embedded
+in a document.
 
 The GitHub mark (assets/mark-github.svg) from Primer Octicons is licensed
 under the MIT License; see assets/Octicons-LICENSE.txt.

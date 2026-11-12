@@ -19,8 +19,9 @@ The game's footer links back to the arcade when played standalone; the link is
 hidden inside an iframe so embedded play stays in the cabinet.
 
 Open **[`dist/mona-merge-maze.html`](dist/mona-merge-maze.html)** directly in a
-modern browser. The game, original chiptune soundtrack, and Mona Sans font are
-embedded in this single file. No network connection is required.
+modern browser. The game, original chiptune soundtrack, and the Mona Sans
+glyphs the game uses are embedded in this single file (see
+[Payload budget](#payload-budget)). No network connection is required.
 
 Or run the local server with Node.js 22 or newer:
 
@@ -113,10 +114,34 @@ The build also stamps the page's Content Security Policy hashes (see
 block in `index.html`, run `npm run build` before `npm test`; `csp.test.js`
 fails while either committed page carries stale hashes.
 
+### Payload budget
+
+The build embeds a subset of Mona Sans rather than the whole font. `font.mjs`
+cuts, in memory, the printable ASCII range plus the symbols the page and
+scripts use (`EXTRA_CHARACTERS`), pins the width axis, narrows the weight axis
+to 400-800, and keeps the optical-size axis so text and display sizes render
+as designed. The committed `assets/mona-sans.woff2` stays the unmodified
+original; the subset exists only inside `dist/mona-merge-maze.html`, which the
+SIL Open Font License permits for fonts embedded in a document.
+`font.test.js` fails when a source file uses a character the subset lacks, so
+new copy with a new symbol either extends the list or falls back deliberately.
+
+With the subset, the standalone page is 756,883 bytes raw and 230,524 gzipped,
+down from 1,057,080 and 478,777 with the whole font embedded. `size.test.js`,
+part of `npm test`, fails when the built file exceeds the `sizeBudget` in
+`package.json` (830,000 bytes, about 10% of headroom). A dependency update
+that grows the bundle must be trimmed, or the budget raised deliberately with
+the reason recorded here.
+
+The renderer requests `powerPreference: 'low-power'` and caps the rendering
+pixel ratio at 1.5 so conference and mobile play stays easy on batteries.
+
 ## Deploy
 
-Push to `main` to deploy automatically to GitHub Pages, or run **Deploy game to
-GitHub Pages** manually from the Actions tab on `main`. **Cabinet compatibility**
+Merging to `main` deploys automatically to GitHub Pages; **Deploy game to
+GitHub Pages** can also be run manually from the Actions tab on `main`. Direct
+pushes to `main` are blocked: changes land through pull requests that pass
+**Cabinet compatibility**, which
 runs the Node tests, builds the candidate, and exercises it inside the real
 Commit Cabinet before deployment is allowed. The deployment job depends on that
 check and publishes the exact tested HTML as `index.html`, without rebuilding.
@@ -140,10 +165,9 @@ publication but does not roll it back.
 
 GitHub Pages must use **GitHub Actions** as its publishing source; branch-based
 Pages would bypass this deployment gate. Mona's repository already uses Actions.
-To block merging incompatible PRs as well as deploying them, an administrator
-must separately make **Cabinet compatibility** a required status check on
-`main` using a ruleset or branch protection, after the check has run. Adding
-this workflow does not configure that repository setting.
+The pull-request requirement and the **Cabinet compatibility** required status
+check on `main` are repository rules, not part of this workflow; an
+administrator maintains them in the repository's rulesets.
 
 ## Cabinet compatibility
 
@@ -214,13 +238,19 @@ failure. One test proves the policy blocks an injected inline script and
 `tests/cabinet/accessibility.spec.js` runs [axe-core](https://github.com/dequelabs/axe-core)
 through `@axe-core/playwright` on the start screen, help dialog, mid-game,
 paused (light and dark theme), first-person, level-complete, and game-over
-states, both standalone and inside the cabinet. Any **serious** or
-**critical** violation fails the gate; moderate and minor findings and
-needs-review items are reported in the results but do not block. The
-level-complete and game-over panels are rendered through the same DOM state the
-HUD applies, since reaching them depends on the enemy chase. A sanity test
-injects an unlabeled link into the game frame and requires the gate to catch
-it.
+states, both standalone and inside the cabinet. Any violation at **any
+impact**, minor through critical, in the game's own document fails the gate;
+the cabinet chrome around the frame, maintained in the arcade repository, is
+held to serious and critical. Needs-review items are reported in the results
+but do not block. The level-complete and game-over panels are rendered through
+the same DOM state the HUD applies, since reaching them depends on the enemy
+chase. A sanity test injects an unlabeled link into the game frame and
+requires the gate to catch it. Because the HUD re-syncs the unlocked objective
+and the active pickup timers from game state every frame, a further test
+measures their contrast, and the help legend's glyph colours, on structural
+probes in both themes; a final test checks that single-letter shortcuts act
+only while the board has focus and that clicking a header toggle hands focus
+back to it.
 
 Run a read-only baseline against production separately:
 
@@ -249,6 +279,29 @@ certification. The existing music unit tests cover the audio lifecycle; the
 browser suite checks audio controls. WebGL color diversity is a startup
 sanity check, not a pixel-perfect visual regression test.
 
+## Accessibility
+
+The game targets WCAG 2.2 AA. Every control is operable from the keyboard
+(see [Controls](#controls)); each focusable element shows a 3px focus ring
+that the layout never clips or covers, and every target is at least 24 CSS
+pixels (the touch pad buttons are 44). Text and interface colours meet 4.5:1
+and 3:1 in both themes, including the state-dependent HUD text and the help
+legend, which use the `--cp-*-ink` tokens in `style.css`; the base tokens
+remain for fills and the 3D palette. Pausing costs nothing: P, Escape, the
+pause button, opening help, and leaving the tab all pause, and timers count
+playing time only. Single-letter shortcuts act only while the board or the
+page itself has focus, so typing into a control is never read as a command,
+and clicking a header toggle during a run hands focus back to the board. The
+page has no content flashing more than three times per second.
+
+A visually hidden `role="status"` region announces pause, resume, level
+complete, and game over. Under `prefers-reduced-motion: reduce`, the 3D view
+still follows Mona through the maze, since the game is a chase, but the idle
+bob, bug hover, sparkles, pickup spin, portal pulse, and camera easing are
+off, turns snap instead of easing, and CSS transitions are disabled. The board
+is a labelled application region whose label states the keys; the lives
+display is a labelled image, and the level counter is a live region.
+
 ## Security
 
 Report a vulnerability privately through GitHub's Private Vulnerability
@@ -267,7 +320,7 @@ the site's `index.html`, so the same policy protects the published game:
 | `script-src` | one `'sha256-…'` hash per inline `<script>` | The theme scripts and the bundled game are inline. No `'unsafe-inline'`, `'unsafe-eval'`, or host sources. |
 | `style-src` | the `'sha256-…'` hash of the inline `<style>` block | The game changes styles only through the CSSOM (`element.style.width`), which a hash-based policy allows. `style` attributes in markup or `setAttribute('style')` would be blocked. |
 | `img-src` | `data:` | The favicon is the GitHub mark embedded as a data URL; the header mark is inline SVG. |
-| `font-src` | `data:` | Mona Sans is embedded as a data URL inside the style block. |
+| `font-src` | `data:` | The Mona Sans subset is embedded as a data URL inside the style block. |
 | `base-uri`, `form-action` | `'none'` | The page has no `<base>` element and no forms. |
 
 WebGL, Web Audio, `localStorage`, and the help `<dialog>` need no directive.
@@ -295,12 +348,13 @@ any runtime violation (see [Cabinet compatibility](#cabinet-compatibility)).
 | `music.js` | Original synthesized Web Audio soundtrack |
 | `index.html`, `style.css` | Responsive interface and theme tokens |
 | `build.mjs` | Single-file bundling and asset/license embedding |
+| `font.mjs` | Build-time Mona Sans subsetting shared by the build and its tests |
 | `csp.mjs` | Content Security Policy hashing shared by the build and its tests |
 | `server.mjs` | Loopback-only local preview server |
 | `.github/workflows/pages.yml` | Test, build, and deploy the game to GitHub Pages |
 | `.github/dependabot.yml` | Weekly action-pin and npm devDependency updates |
 | `SECURITY.md` | Supported versions, reporting channel, and scope |
-| `*.test.js` | Node.js tests for gameplay, timing, audio lifecycle, and the policy |
+| `*.test.js` | Node.js tests for gameplay, timing, audio lifecycle, the policy, the font subset, and the size budget |
 | `tests/cabinet/`, `playwright*.config.js` | Pinned real-cabinet candidate gate, accessibility gate, and published smoke |
 
 ## Credits

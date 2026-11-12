@@ -6,11 +6,14 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "node server.mjs",
-    "test": "node --test engine.test.js music.test.js timing.test.js csp.test.js tests/cabinet/health.test.js",
+    "test": "node --test engine.test.js music.test.js timing.test.js csp.test.js font.test.js size.test.js tests/cabinet/health.test.js",
     "cabinet:setup": "node tests/cabinet/setup.mjs",
     "cabinet:serve": "node tests/cabinet/server.mjs",
     "test:cabinet": "playwright test --config=playwright.config.js",
     "test:live": "node tests/cabinet/live-smoke.mjs"
+  },
+  "sizeBudget": {
+    "dist/mona-merge-maze.html": 830000
   },
   "dependencies": {
     "three": "0.187.0"
@@ -18,6 +21,9 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.65.0",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "fontverter": "2.0.0",
+    "harfbuzzjs": "1.6.4",
+    "subset-font": "2.9.0"
   }
 }
