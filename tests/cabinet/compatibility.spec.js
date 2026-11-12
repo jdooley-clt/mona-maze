@@ -1,10 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
-import { watchHealth, ready, start, moveAndCollect, reachable, noHorizontalClipping } from './helpers.js';
+import { watchHealth, watchPolicy, expectStrictPolicy, expectNoViolations, ready, start, moveAndCollect, reachable, noHorizontalClipping } from './helpers.js';
 
 const healthChecks = new WeakMap();
 test.beforeEach(async ({ page, baseURL }, testInfo) => {
   healthChecks.set(page, watchHealth(page, [baseURL]));
+  await watchPolicy(page);
   await page.goto(testInfo.tags.includes('@standalone') ? '/mona-maze/' : '/arcade/');
 });
 test.afterEach(async ({ page }) => healthChecks.get(page)());
@@ -23,6 +24,7 @@ async function launch(page, baseURL, keyboard = false) {
   expect(await response.body()).toEqual(await readFile('dist/mona-merge-maze.html'));
   const game = page.frameLocator('#frame-host iframe');
   await ready(game);
+  await expectStrictPolicy(game);
   await expect(game.locator('#arcade-link')).toBeHidden();
   await expect(iframe).toHaveAttribute('sandbox', 'allow-scripts allow-same-origin allow-pointer-lock');
   await expect(iframe).toHaveAttribute('allow', 'fullscreen; gamepad');
@@ -32,6 +34,7 @@ async function launch(page, baseURL, keyboard = false) {
 async function standaloneBacklink(page) {
   await expect(page).toHaveURL(/\/mona-maze\/$/);
   await ready(page);
+  await expectStrictPolicy(page);
   const link = page.getByRole('link', { name: 'GitHub Arcade', exact: true });
   await expect(link).toHaveAttribute('href', 'https://jdooley-clt.github.io/arcade/');
   expect(await link.getAttribute('target')).toBeNull();
@@ -141,6 +144,52 @@ test('reload, return, switch and browser navigation detach the old iframe', asyn
   await ready(page.frameLocator('iframe'));
   await expect(page.locator('iframe')).toHaveCount(1);
   await expect(page.locator('iframe')).toHaveAttribute('src', `${baseURL}/mona-maze/`);
+});
+
+test('the Content Security Policy raises no violation across launch, play, pause, preferences and return', async ({ page, baseURL }) => {
+  const game = await launch(page, baseURL);
+  await start(game);
+  await moveAndCollect(page, game);
+  await page.keyboard.press('v');
+  await expect(game.locator('#first')).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.press('p');
+  await expect(game.locator('#message-title')).toHaveText('Paused.');
+  for (const id of ['theme', 'theme', 'help', 'close-help']) await game.locator(`#${id}`).click();
+  await expect(game.locator('#help-dialog')).toBeHidden();
+  await page.setViewportSize({ width: 900, height: 700 });
+  await expect(game.locator('#stage')).not.toHaveClass(/playing/);
+  await expectNoViolations(game);
+  const frame = page.frames().find(frame => frame.url() === `${baseURL}/mona-maze/`);
+  await page.locator('#return-button').click();
+  await expect.poll(() => frame.isDetached()).toBe(true);
+  await expectNoViolations(page);
+});
+
+test('the Content Security Policy blocks injected inline script and style attributes', { tag: '@standalone' }, async ({ context }) => {
+  // A separate page keeps the expected violations out of the health check of the fixture page.
+  const probe = await context.newPage();
+  await watchPolicy(probe);
+  await probe.goto('/mona-maze/');
+  await ready(probe);
+  const outcome = await probe.evaluate(() => {
+    const script = document.createElement('script');
+    script.textContent = 'window.__injected = true';
+    document.head.append(script);
+    const box = document.createElement('div');
+    box.setAttribute('style', 'color: rgb(1, 2, 3)');
+    document.body.append(box);
+    const attribute = getComputedStyle(box).color;
+    box.style.color = 'rgb(4, 5, 6)';
+    return { injected: window.__injected === true, attribute, cssom: getComputedStyle(box).color };
+  });
+  expect(outcome.injected, 'inline script must not execute').toBe(false);
+  expect(outcome.attribute, 'style attributes must be ignored').not.toBe('rgb(1, 2, 3)');
+  expect(outcome.cssom, 'CSSOM updates used by the game must keep working').toBe('rgb(4, 5, 6)');
+  expect(await probe.evaluate(() => window.__cspViolations)).toEqual([
+    expect.stringMatching(/^script-src-elem blocked inline/),
+    expect.stringMatching(/^style-src-attr blocked inline/),
+  ]);
+  await probe.close();
 });
 
 for (const width of [320, 390]) {

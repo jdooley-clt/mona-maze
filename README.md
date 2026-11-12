@@ -108,6 +108,11 @@ The server reads the built file on every request. Rebuild and refresh after
 editing source. Commit the updated `dist/mona-merge-maze.html` when shipping a
 change so the standalone download stays current.
 
+The build also stamps the page's Content Security Policy hashes (see
+[Security](#security)). After editing `style.css`, `main.js`, or an inline
+block in `index.html`, run `npm run build` before `npm test`; `csp.test.js`
+fails while either committed page carries stale hashes.
+
 ## Deploy
 
 Push to `main` to deploy automatically to GitHub Pages, or run **Deploy game to
@@ -120,6 +125,10 @@ permissions and never deploy. Publishing is restricted to `jdooley-clt/mona-maze
 pushes and manual runs in forks cannot upload a Pages artifact or deploy.
 Pages and OIDC write permissions are limited to
 the main-only deployment job. Source files and test fixtures are not published.
+Every action in the workflow is pinned to a full commit SHA with its version in
+a trailing comment, and every checkout uses `persist-credentials: false`.
+`.github/dependabot.yml` opens weekly pull requests for newer action pins and
+for npm devDependencies, grouping minor and patch updates of the latter.
 
 **Published cabinet smoke** then checks the actual game and
 <https://jdooley-clt.github.io/arcade/#game/mona-maze>. It checks the served HTML's
@@ -150,9 +159,15 @@ npm run test:cabinet
 ```
 
 CI uses `npx playwright install --with-deps chromium` on Ubuntu. The Playwright
-suite has **no retries**, uses one Chromium worker with software WebGL, and
-retains traces/screenshots on failure in ignored `test-results/`. Inspect a
-failure with `npx playwright show-trace test-results/<test>/trace.zip`.
+suite retries a failed test only in CI (`retries: process.env.CI ? 2 : 0`), so
+local runs surface flakes immediately; it uses one Chromium worker with
+software WebGL, emulates `prefers-reduced-motion: reduce` (a browser-context
+option, set through `contextOptions`) so transitions are off and the colour
+audits never sample a fade, and retains traces/screenshots on failure in
+ignored `test-results/`. Inspect a failure with
+`npx playwright show-trace test-results/<test>/trace.zip`.
+If the main run flakes: `gh run rerun <run-id> --failed`; deploy only happens
+after the gate is green.
 
 The harness checks out the real static <https://github.com/jdooley-clt/arcade> at
 `cdbd39c365f5daf50f47d06d10644d61d1572aaf` into ignored `.playwright-cabinet/`.
@@ -190,6 +205,23 @@ Focus mode is entered before starting because Mona intentionally pauses on
 blur. Tests use DOM state, score changes, and rendered pixels: no game-state
 backdoor, cropped document, or runtime messaging bridge.
 
+Every launch also asserts the game's strict Content Security Policy meta tag,
+and a `securitypolicyviolation` listener installed in every frame turns any
+violation during launch, play, pause, preference changes, and return into a
+failure. One test proves the policy blocks an injected inline script and
+`style` attribute while leaving CSSOM updates working.
+
+`tests/cabinet/accessibility.spec.js` runs [axe-core](https://github.com/dequelabs/axe-core)
+through `@axe-core/playwright` on the start screen, help dialog, mid-game,
+paused (light and dark theme), first-person, level-complete, and game-over
+states, both standalone and inside the cabinet. Any **serious** or
+**critical** violation fails the gate; moderate and minor findings and
+needs-review items are reported in the results but do not block. The
+level-complete and game-over panels are rendered through the same DOM state the
+HUD applies, since reaching them depends on the enemy chase. A sanity test
+injects an unlabeled link into the game frame and requires the gate to catch
+it.
+
 Run a read-only baseline against production separately:
 
 ```sh
@@ -217,6 +249,42 @@ certification. The existing music unit tests cover the audio lifecycle; the
 browser suite checks audio controls. WebGL color diversity is a startup
 sanity check, not a pixel-perfect visual regression test.
 
+## Security
+
+Report a vulnerability privately through GitHub's Private Vulnerability
+Reporting at <https://github.com/jdooley-clt/mona-maze/security/advisories/new>.
+[`SECURITY.md`](SECURITY.md) lists the supported versions and the scope.
+
+### Content Security Policy
+
+`index.html` declares `<meta name="referrer" content="strict-origin-when-cross-origin">`
+and a meta Content Security Policy. The workflow publishes the built file as
+the site's `index.html`, so the same policy protects the published game:
+
+| Directive | Value | Why |
+| --- | --- | --- |
+| `default-src` | `'none'` | Everything not listed below is blocked: network connections, media, frames, workers, and plugins. |
+| `script-src` | one `'sha256-…'` hash per inline `<script>` | The theme scripts and the bundled game are inline. No `'unsafe-inline'`, `'unsafe-eval'`, or host sources. |
+| `style-src` | the `'sha256-…'` hash of the inline `<style>` block | The game changes styles only through the CSSOM (`element.style.width`), which a hash-based policy allows. `style` attributes in markup or `setAttribute('style')` would be blocked. |
+| `img-src` | `data:` | The favicon is the GitHub mark embedded as a data URL; the header mark is inline SVG. |
+| `font-src` | `data:` | Mona Sans is embedded as a data URL inside the style block. |
+| `base-uri`, `form-action` | `'none'` | The page has no `<base>` element and no forms. |
+
+WebGL, Web Audio, `localStorage`, and the help `<dialog>` need no directive.
+`frame-ancestors`, `sandbox`, and `report-uri` cannot be set from a meta tag,
+so the policy does not restrict where the game may be embedded; the cabinet
+applies its own iframe `sandbox` attribute. The embedded license text
+(`<script type="text/plain">`) is never executed and is not hashed.
+
+`csp.mjs` computes each hash as SHA-256 over the element's text with CRLF
+normalized to LF, as browsers do, so LF and CRLF checkouts hash identically.
+`build.mjs` stamps the hashes into `dist/mona-merge-maze.html` and refreshes
+`index.html`'s own hashes on every `npm run build`. `csp.test.js`, part of
+`npm test`, fails if either committed page disagrees with its own inline
+blocks, if an unsafe source appears, or if the policy no longer precedes every
+script, style, and link. The Playwright gate asserts the policy and fails on
+any runtime violation (see [Cabinet compatibility](#cabinet-compatibility)).
+
 ## Source layout
 
 | File | Purpose |
@@ -227,10 +295,13 @@ sanity check, not a pixel-perfect visual regression test.
 | `music.js` | Original synthesized Web Audio soundtrack |
 | `index.html`, `style.css` | Responsive interface and theme tokens |
 | `build.mjs` | Single-file bundling and asset/license embedding |
+| `csp.mjs` | Content Security Policy hashing shared by the build and its tests |
 | `server.mjs` | Loopback-only local preview server |
 | `.github/workflows/pages.yml` | Test, build, and deploy the game to GitHub Pages |
-| `*.test.js` | Node.js tests for gameplay, timing, and audio lifecycle |
-| `tests/cabinet/`, `playwright*.config.js` | Pinned real-cabinet candidate gate and published smoke |
+| `.github/dependabot.yml` | Weekly action-pin and npm devDependency updates |
+| `SECURITY.md` | Supported versions, reporting channel, and scope |
+| `*.test.js` | Node.js tests for gameplay, timing, audio lifecycle, and the policy |
+| `tests/cabinet/`, `playwright*.config.js` | Pinned real-cabinet candidate gate, accessibility gate, and published smoke |
 
 ## Credits
 
