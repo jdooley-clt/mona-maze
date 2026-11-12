@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-KshdanNgSOknnIjGFhooyTknYh/1k+Q31Pp3861bPz8=' 'sha256-jPIy5ZWCQfqpn/AI+Q4KBvye7rOAvd+HiYjh3NwhbCA=' 'sha256-pzg+8jEdhdInPzfjbiD6/ChX/nZLQ+90AsG+zd4r980='; style-src 'sha256-E+bnsmxbkDI971J4bmjyOhF9qaBSJgVb4nmF/s4iNUg='; img-src data:; font-src data:; base-uri 'none'; form-action 'none'">
   <title>Mona's Merge Maze</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48cGF0aCBkPSJNNi43NjYgMTEuMzI4Yy0yLjA2My0uMjUtMy41MTYtMS43MzQtMy41MTYtMy42NTYgMC0uNzgxLjI4MS0xLjYyNS43NS0yLjE4OC0uMjAzLS41MTUtLjE3Mi0xLjYwOS4wNjMtMi4wNjIuNjI1LS4wNzggMS40NjguMjUgMS45NjguNzAzLjU5NC0uMTg3IDEuMjE5LS4yODEgMS45ODUtLjI4MS43NjUgMCAxLjM5LjA5NCAxLjk1My4yNjUuNDg0LS40MzcgMS4zNDQtLjc2NSAxLjk2OS0uNjg3LjIxOC40MjIuMjUgMS41MTUuMDQ2IDIuMDQ3LjUuNTkzLjc2NiAxLjM5Ljc2NiAyLjIwMyAwIDEuOTIyLTEuNDUzIDMuMzc1LTMuNTQ3IDMuNjQuNTMxLjM0NC44OSAxLjA5NC44OSAxLjk1NHYxLjYyNWMwIC40NjguMzkxLjczNC44Ni41NDdDMTMuNzgxIDE0LjM1OSAxNiAxMS41MyAxNiA4LjAzIDE2IDMuNjEgMTIuNDA2IDAgNy45ODQgMCAzLjU2MyAwIDAgMy42MSAwIDguMDMxYTcuODggNy44OCAwIDAgMCA1LjE3MiA3LjQyMmMuNDIyLjE1Ni44MjgtLjEyNS44MjgtLjU0N3YtMS4yNWMtLjIxOS4wOTQtLjUuMTU2LS43NS4xNTYtMS4wMzEgMC0xLjY0LS41NjItMi4wNzgtMS42MDktLjE3Mi0uNDIyLS4zNi0uNjcyLS43MTktLjcxOS0uMTg3LS4wMTUtLjI1LS4wOTMtLjI1LS4xODcgMC0uMTg4LjMxMy0uMzI4LjYyNS0uMzI4LjQ1MyAwIC44NDQuMjgxIDEuMjUuODYuMzEzLjQ1Mi42NC42NTUgMS4wMzEuNjU1cy42NDEtLjE0IDEtLjVjLjI2Ni0uMjY1LjQ3LS41LjY1Ny0uNjU2Ii8+PC9zdmc+">
   <script>
@@ -29,7 +31,7 @@
   --cp-border-strong: #9785a9;
   --cp-text: #302340;
   --cp-text-muted: #665873;
-  --cp-text-soft: #746581;
+  --cp-text-soft: #6c5d79;
   --cp-accent: #7050b8;
   --cp-accent-hover: #5d409e;
   --cp-accent-soft: rgba(112, 80, 184, 0.08);
@@ -40,7 +42,7 @@
   --cp-success: #16a34a;
   --cp-danger: #dc2626;
   --cp-warning: #f59e0b;
-  --cp-link: #0078d4;
+  --cp-link: #005fb8;
   --cp-shadow: 0 18px 48px rgba(48, 35, 64, 0.12);
   --cp-overlay: rgba(250, 248, 253, 0.8);
   --cp-panel: rgba(250, 248, 253, 0.86);
@@ -237,7 +239,7 @@ footer { align-items: center; flex-wrap: wrap; gap: 8px 16px; }
 <body>
   <div class="app">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Mona's Merge Maze home"><svg aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg><span>GitHub<span class="brand-sub">/ Arcade</span></span></a>
+      <a class="brand" href="./" aria-label="GitHub / Arcade: Mona's Merge Maze home"><svg aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg><span>GitHub<span class="brand-sub">/ Arcade</span></span></a>
       <div class="top-note"><span class="live-dot"></span> A little less work. A little more play.</div>
       <div class="top-actions"><button id="theme" class="icon-button" aria-pressed="false" title="Toggle dark mode">Dark mode</button><button id="music" class="icon-button" aria-pressed="true" title="Toggle original chiptune soundtrack">Music on</button><button id="sound" class="icon-button" aria-pressed="true" title="Toggle sound effects">SFX on</button><button id="help" class="icon-button" aria-label="How to play">?</button></div>
     </header>

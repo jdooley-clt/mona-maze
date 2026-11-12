@@ -1,5 +1,28 @@
 import { expect } from '@playwright/test';
 
+export const STRICT_POLICY = /^default-src 'none'; script-src(?: 'sha256-[A-Za-z0-9+/]{43}=')+; style-src(?: 'sha256-[A-Za-z0-9+/]{43}=')+; img-src data:; font-src data:; base-uri 'none'; form-action 'none'$/;
+
+// Records Content Security Policy violations in every frame; a violation also fails watchHealth.
+export async function watchPolicy(page) {
+  await page.addInitScript(() => {
+    window.__cspViolations = [];
+    document.addEventListener('securitypolicyviolation', event => {
+      const violation = `${event.violatedDirective} blocked ${event.blockedURI} at ${event.sourceFile}:${event.lineNumber}`;
+      window.__cspViolations.push(violation);
+      console.error(`Content Security Policy violation: ${violation}`);
+    });
+  });
+}
+
+export async function expectNoViolations(scope) {
+  expect(await scope.locator(':root').evaluate(() => window.__cspViolations), 'Content Security Policy violations').toEqual([]);
+}
+
+export async function expectStrictPolicy(scope) {
+  await expect(scope.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveAttribute('content', STRICT_POLICY);
+  await expect(scope.locator('meta[name="referrer"]')).toHaveAttribute('content', 'strict-origin-when-cross-origin');
+}
+
 export function watchHealth(page, origins) {
   const errors = [];
   const failedRequests = [];

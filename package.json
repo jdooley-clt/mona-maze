@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "node server.mjs",
-    "test": "node --test engine.test.js music.test.js timing.test.js tests/cabinet/health.test.js",
+    "test": "node --test engine.test.js music.test.js timing.test.js csp.test.js tests/cabinet/health.test.js",
     "cabinet:setup": "node tests/cabinet/setup.mjs",
     "cabinet:serve": "node tests/cabinet/server.mjs",
     "test:cabinet": "playwright test --config=playwright.config.js",
@@ -16,7 +16,8 @@
     "three": "0.180.0"
   },
   "devDependencies": {
-    "esbuild": "0.25.10",
-    "@playwright/test": "1.58.2"
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.58.2",
+    "esbuild": "0.25.10"
   }
 }
